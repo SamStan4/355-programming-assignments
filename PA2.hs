@@ -118,6 +118,19 @@ convertAllToINRBST Empty = Empty
 convertAllToINRBST (Node (USD v) l r) = Node (convert (USD v)) (convertAllToINRBST l) (convertAllToINRBST r)
 convertAllToINRBST (Node (INR v) l r) = Node (INR v) (convertAllToINRBST l) (convertAllToINRBST r)
 
+--  /$$$$$$$                       /$$            /$$$$$$  /$$          
+-- | $$__  $$                     | $$           /$$__  $$|__/          
+-- | $$  \ $$ /$$$$$$   /$$$$$$  /$$$$$$        | $$  \__/ /$$ /$$   /$$
+-- | $$$$$$$/|____  $$ /$$__  $$|_  $$_/        |  $$$$$$ | $$|  $$ /$$/
+-- | $$____/  /$$$$$$$| $$  \__/  | $$           \____  $$| $$ \  $$$$/ 
+-- | $$      /$$__  $$| $$        | $$ /$$       /$$  \ $$| $$  >$$  $$ 
+-- | $$     |  $$$$$$$| $$        |  $$$$/      |  $$$$$$/| $$ /$$/\  $$
+-- |__/      \_______/|__/         \___/         \______/ |__/|__/  \__/
+
+instance Functor BST where
+    fmap _ Empty = Empty
+    fmap f (Node v l r) = Node (f v) (fmap f l) (fmap f r)
+
 main :: IO ()
 main = do
     let t = Empty
