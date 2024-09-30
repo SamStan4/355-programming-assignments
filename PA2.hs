@@ -44,5 +44,32 @@ instance Ord Currency where
 -- |__/      \_______/|__/         \___/           |__/ \_____/\___/  \______/ 
 
 -- here is the definition for the BST with two constructors
-data BST a = Empty | Node Currency (BST a) (BST a)
+data BST a = Empty | Node a (BST a) (BST a)
 
+-- this makes it so BST is part of the show type class, this is just an in order print
+instance Show a => Show (BST a) where
+    show Empty = ""
+    show (Node x l r) = (show l ++ " " ++ show x ++ " " ++ show r)
+
+-- this is a simple insert funciton for the BST, I think that it is correct, more testing is needed
+insertBST :: Ord t => BST t -> t -> BST t
+insertBST Empty x = Node x Empty Empty
+insertBST (Node v l r) x = if x > v 
+    then Node v l (insertBST r x)
+    else Node v (insertBST l x) r
+
+
+
+
+
+
+
+
+
+
+main :: IO ()
+main = do
+    let t = Empty
+    let t' = insertBST t (USD 100)
+    let t'' = insertBST t' (INR 1000)
+    putStrLn (show t'')
