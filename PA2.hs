@@ -33,6 +33,7 @@ instance Ord Currency where
     compare (INR x) (INR y) = compare x y
     compare (USD x) (INR y) = compare x y
     compare (INR x) (USD y) = compare x y
+    
 
 --  /$$$$$$$                       /$$           /$$$$$$$$                     
 -- | $$__  $$                     | $$          |__  $$__/                     
@@ -82,6 +83,24 @@ searchBST (Node v l r) x = if x == v
 -- | $$     |  $$$$$$$| $$        |  $$$$/      | $$   |  $$$$$$/|  $$$$$$/| $$      
 -- |__/      \_______/|__/         \___/        |__/    \______/  \______/ |__/      
 
+sumAllUSDBSTHelper :: BST Currency -> Double
+sumAllUSDBSTHelper Empty = 0
+sumAllUSDBSTHelper (Node (USD v) l r) = v + (sumAllUSDBSTHelper l) + (sumAllUSDBSTHelper r)
+sumAllUSDBSTHelper (Node (INR v) l r) = (v * 0.012) + (sumAllUSDBSTHelper l) + (sumAllUSDBSTHelper r)
+
+sumAllUSDBST :: BST Currency -> Currency
+sumAllUSDBST x = USD (sumAllUSDBSTHelper x)
+
+
+sumAllINRBSTHelper :: BST Currency -> Double
+sumAllINRBSTHelper Empty = 0
+sumAllINRBSTHelper (Node (USD v) l r) = (v * 82) + (sumAllINRBSTHelper l) + (sumAllINRBSTHelper r)
+sumAllINRBSTHelper (Node (INR v) l r) = v + (sumAllINRBSTHelper l) + (sumAllINRBSTHelper r)
+
+sumAllINRBST :: BST Currency -> Currency
+sumAllINRBST x = INR (sumAllINRBSTHelper x)
+
+
 
 main :: IO ()
 main = do
@@ -90,4 +109,6 @@ main = do
     let t'' = insertBST t' (INR 1000)
     putStrLn (show t'')
     let res = searchBST t'' (USD 1000)
-    putStrLn (show res)
+    let inrT = sumAllINRBST t''
+    let usdT = sumAllUSDBST t''
+    putStrLn (show res ++ show inrT ++ show usdT)
