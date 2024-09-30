@@ -24,8 +24,8 @@ convert (INR x) = USD (x * 0.012)
 instance Eq Currency where
     (USD x) == (USD y) = x == y
     (INR x) == (INR y) = x == y
-    (USD x) == (INR y) = (x * 82) == y
-    (INR x) == (USD y) = x == (y * 82)
+    (USD _) == (INR _) = False
+    (INR _) == (USD _) = False
 
 -- this is so that we can make currency of typeclass Ord, this is going to help a lot for tree insertions
 instance Ord Currency where
@@ -58,13 +58,29 @@ insertBST (Node v l r) x = if x > v
     then Node v l (insertBST r x)
     else Node v (insertBST l x) r
 
+--  /$$$$$$$                       /$$           /$$$$$$$$ /$$                                    
+-- | $$__  $$                     | $$          |__  $$__/| $$                                    
+-- | $$  \ $$ /$$$$$$   /$$$$$$  /$$$$$$           | $$   | $$$$$$$   /$$$$$$   /$$$$$$   /$$$$$$ 
+-- | $$$$$$$/|____  $$ /$$__  $$|_  $$_/           | $$   | $$__  $$ /$$__  $$ /$$__  $$ /$$__  $$
+-- | $$____/  /$$$$$$$| $$  \__/  | $$             | $$   | $$  \ $$| $$  \__/| $$$$$$$$| $$$$$$$$
+-- | $$      /$$__  $$| $$        | $$ /$$         | $$   | $$  | $$| $$      | $$_____/| $$_____/
+-- | $$     |  $$$$$$$| $$        |  $$$$/         | $$   | $$  | $$| $$      |  $$$$$$$|  $$$$$$$
+-- |__/      \_______/|__/         \___/           |__/   |__/  |__/|__/       \_______/ \_______/
 
+searchBST :: Eq t => BST t -> t -> Bool
+searchBST Empty _ = False
+searchBST (Node v l r) x = if x == v
+    then True
+    else (searchBST l x) || (searchBST r x)
 
-
-
-
-
-
+--  /$$$$$$$                       /$$           /$$$$$$$$                           
+-- | $$__  $$                     | $$          | $$_____/                           
+-- | $$  \ $$ /$$$$$$   /$$$$$$  /$$$$$$        | $$     /$$$$$$  /$$   /$$  /$$$$$$ 
+-- | $$$$$$$/|____  $$ /$$__  $$|_  $$_/        | $$$$$ /$$__  $$| $$  | $$ /$$__  $$
+-- | $$____/  /$$$$$$$| $$  \__/  | $$          | $$__/| $$  \ $$| $$  | $$| $$  \__/
+-- | $$      /$$__  $$| $$        | $$ /$$      | $$   | $$  | $$| $$  | $$| $$      
+-- | $$     |  $$$$$$$| $$        |  $$$$/      | $$   |  $$$$$$/|  $$$$$$/| $$      
+-- |__/      \_______/|__/         \___/        |__/    \______/  \______/ |__/      
 
 
 main :: IO ()
@@ -73,3 +89,5 @@ main = do
     let t' = insertBST t (USD 100)
     let t'' = insertBST t' (INR 1000)
     putStrLn (show t'')
+    let res = searchBST t'' (USD 1000)
+    putStrLn (show res)
