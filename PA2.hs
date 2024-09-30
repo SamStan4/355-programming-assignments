@@ -173,4 +173,4 @@ convertAllUSDfmap :: Functor f => f Currency -> f Currency
 convertAllUSDfmap t = convertToUSD `fmap` t
 
 convertAllINRfmap :: Functor f => f Currency -> f Currency
-convertAllINRfmap t = convertToUSD `fmap` t
+convertAllINRfmap t = convertToINR `fmap` t
