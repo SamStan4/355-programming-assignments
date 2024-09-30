@@ -60,11 +60,28 @@ convertSwitch (INR x) = USD (x * 0.012)
 -- here is the definition for the BST data structure that we are going to be working with
 data BST a = Empty | Node a (BST a) (BST a)
 
+-- simple in order print for the tree
+inOrderPrint :: Show a => BST a -> [Char]
+inOrderPrint n = case n of
+    Empty -> ""
+    (Node v l r) -> (inOrderPrint l) ++ " " ++ (show v) ++ " " ++ (inOrderPrint r)
+
+-- simple reverse order print of the tree
+reverseOrderPrint :: Show a => BST a -> [Char]
+reverseOrderPrint n = case n of
+    Empty -> ""
+    (Node v l r) -> (reverseOrderPrint r) ++ " " ++ (show v) ++ " " ++ (reverseOrderPrint l)
+
+-- this print gives a better look into the actual structure of the tree
+structuredPrint :: Show a => BST a -> [Char]
+structuredPrint n = case n of
+    Empty -> "Empty"
+    (Node v l r) -> "<(" ++ (show v) ++ "), (" ++ (structuredPrint l) ++ "), (" ++ (structuredPrint r) ++ ")>"
+
 -- this makes the BST an instance of the show type class
 -- the show operation defined is an in order print
 instance Show a => Show (BST a) where
-    show Empty = ""
-    show (Node v l r) = (show l) ++ " " ++ (show v) ++ " " ++ (show r)
+    show t = inOrderPrint t
 
 -- super simple insert function for a BST
 insertBST :: Ord t => BST t -> t -> BST t
