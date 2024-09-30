@@ -91,7 +91,6 @@ sumAllUSDBSTHelper (Node (INR v) l r) = (v * 0.012) + (sumAllUSDBSTHelper l) + (
 sumAllUSDBST :: BST Currency -> Currency
 sumAllUSDBST x = USD (sumAllUSDBSTHelper x)
 
-
 sumAllINRBSTHelper :: BST Currency -> Double
 sumAllINRBSTHelper Empty = 0
 sumAllINRBSTHelper (Node (USD v) l r) = (v * 82) + (sumAllINRBSTHelper l) + (sumAllINRBSTHelper r)
@@ -100,15 +99,29 @@ sumAllINRBSTHelper (Node (INR v) l r) = v + (sumAllINRBSTHelper l) + (sumAllINRB
 sumAllINRBST :: BST Currency -> Currency
 sumAllINRBST x = INR (sumAllINRBSTHelper x)
 
+--  /$$$$$$$                       /$$           /$$$$$$$$ /$$                    
+-- | $$__  $$                     | $$          | $$_____/|__/                    
+-- | $$  \ $$ /$$$$$$   /$$$$$$  /$$$$$$        | $$       /$$ /$$    /$$ /$$$$$$ 
+-- | $$$$$$$/|____  $$ /$$__  $$|_  $$_/        | $$$$$   | $$|  $$  /$$//$$__  $$
+-- | $$____/  /$$$$$$$| $$  \__/  | $$          | $$__/   | $$ \  $$/$$/| $$$$$$$$
+-- | $$      /$$__  $$| $$        | $$ /$$      | $$      | $$  \  $$$/ | $$_____/
+-- | $$     |  $$$$$$$| $$        |  $$$$/      | $$      | $$   \  $/  |  $$$$$$$
+-- |__/      \_______/|__/         \___/        |__/      |__/    \_/    \_______/
 
+convertAllToUSDBST :: BST Currency -> BST Currency
+convertAllToUSDBST Empty = Empty
+convertAllToUSDBST (Node (USD v) l r) = Node (USD v) (convertAllToUSDBST l) (convertAllToUSDBST r)
+convertAllToUSDBST (Node (INR v) l r) = Node (convert (INR v)) (convertAllToUSDBST l) (convertAllToUSDBST r)
+
+convertAllToINRBST :: BST Currency -> BST Currency
+convertAllToINRBST Empty = Empty
+convertAllToINRBST (Node (USD v) l r) = Node (convert (USD v)) (convertAllToINRBST l) (convertAllToINRBST r)
+convertAllToINRBST (Node (INR v) l r) = Node (INR v) (convertAllToINRBST l) (convertAllToINRBST r)
 
 main :: IO ()
 main = do
     let t = Empty
     let t' = insertBST t (USD 100)
     let t'' = insertBST t' (INR 1000)
-    putStrLn (show t'')
-    let res = searchBST t'' (USD 1000)
-    let inrT = sumAllINRBST t''
-    let usdT = sumAllUSDBST t''
-    putStrLn (show res ++ show inrT ++ show usdT)
+    let t''' = convertAllToUSDBST t''
+    putStrLn (show t''')
