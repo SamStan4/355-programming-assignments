@@ -1,3 +1,5 @@
+module PA2 where
+
 --  /$$$$$$$                       /$$            /$$$$$$                     
 -- | $$__  $$                     | $$           /$$__  $$                    
 -- | $$  \ $$ /$$$$$$   /$$$$$$  /$$$$$$        | $$  \ $$ /$$$$$$$   /$$$$$$ 
@@ -7,33 +9,44 @@
 -- | $$     |  $$$$$$$| $$        |  $$$$/      |  $$$$$$/| $$  | $$|  $$$$$$$
 -- |__/      \_______/|__/         \___/         \______/ |__/  |__/ \_______/
 
--- the data type that we made for the currency
+-- this is the data that we are going to be using to represent the two different types of currency
+-- there are two constructors, the first being for USD and the second being for INR
 data Currency = USD Double | INR Double
 
--- providing definitions for the Show operator
+-- This makes it so Currency is of typeclass show
 instance Show Currency where
     show (USD x) = "USD " ++ show x
     show (INR x) = "INR " ++ show x
 
--- this is so that we can convert between INR and USD using pattern matching
-convert :: Currency -> Currency
-convert (USD x) = INR (x * 82)
-convert (INR x) = USD (x * 0.012)
-
--- this is so that we can make currency of typeclass Eq, this will make it easier for tree insertions
+-- this makes it so currency is also of type class Eq, we can use this for our BST algorithims that we are about to implement
 instance Eq Currency where
     (USD x) == (USD y) = x == y
     (INR x) == (INR y) = x == y
     (USD _) == (INR _) = False
     (INR _) == (USD _) = False
 
--- this is so that we can make currency of typeclass Ord, this is going to help a lot for tree insertions
+-- this makes it so currency is also of type class Ord, which will be handy for the insertions and searches
 instance Ord Currency where
     compare (USD x) (USD y) = compare x y
     compare (INR x) (INR y) = compare x y
-    compare (USD x) (INR y) = compare x y
-    compare (INR x) (USD y) = compare x y
-    
+    compare (USD x) (INR y) = compare (x * 82) y
+    compare (INR x) (USD y) = compare x (y * 82)
+
+-- Funciton that converts currency to its USD form
+convertToUSD :: Currency -> Currency
+convertToUSD (INR x) = USD (x * 0.012)
+convertToUSD (USD x) = USD x
+
+-- funciton that converts currency into its INR form
+convertToINR :: Currency -> Currency
+convertToINR (USD x) = INR (x * 82)
+convertToINR (INR x) = INR x
+
+-- this just swaps the currency from one thing to another, its a toggle
+convertSwitch :: Currency -> Currency
+convertSwitch (USD x) = INR (x * 82)
+convertSwitch (INR x) = USD (x * 0.012)
+        
 
 --  /$$$$$$$                       /$$           /$$$$$$$$                     
 -- | $$__  $$                     | $$          |__  $$__/                     
@@ -44,15 +57,16 @@ instance Ord Currency where
 -- | $$     |  $$$$$$$| $$        |  $$$$/         | $$|  $$$$$/$$$$/|  $$$$$$/
 -- |__/      \_______/|__/         \___/           |__/ \_____/\___/  \______/ 
 
--- here is the definition for the BST with two constructors
+-- here is the definition for the BST data structure that we are going to be working with
 data BST a = Empty | Node a (BST a) (BST a)
 
--- this makes it so BST is part of the show type class, this is just an in order print
+-- this makes the BST an instance of the show type class
+-- the show operation defined is an in order print
 instance Show a => Show (BST a) where
     show Empty = ""
-    show (Node x l r) = (show l ++ " " ++ show x ++ " " ++ show r)
+    show (Node v l r) = (show l) ++ " " ++ (show v) ++ " " ++ (show r)
 
--- this is a simple insert funciton for the BST, I think that it is correct, more testing is needed
+-- super simple insert function for a BST
 insertBST :: Ord t => BST t -> t -> BST t
 insertBST Empty x = Node x Empty Empty
 insertBST (Node v l r) x = if x > v 
@@ -68,11 +82,13 @@ insertBST (Node v l r) x = if x > v
 -- | $$     |  $$$$$$$| $$        |  $$$$/         | $$   | $$  | $$| $$      |  $$$$$$$|  $$$$$$$
 -- |__/      \_______/|__/         \___/           |__/   |__/  |__/|__/       \_______/ \_______/
 
-searchBST :: Eq t => BST t -> t -> Bool
+-- this is just the haskell implementation of the classic BST search method
+searchBST :: Ord t => BST t -> t -> Bool
 searchBST Empty _ = False
-searchBST (Node v l r) x = if x == v
-    then True
-    else (searchBST l x) || (searchBST r x)
+searchBST (Node v l r) x =
+    if x == v then True
+    else if x < v then searchBST l x   
+    else searchBST r x
 
 --  /$$$$$$$                       /$$           /$$$$$$$$                           
 -- | $$__  $$                     | $$          | $$_____/                           
@@ -83,21 +99,23 @@ searchBST (Node v l r) x = if x == v
 -- | $$     |  $$$$$$$| $$        |  $$$$/      | $$   |  $$$$$$/|  $$$$$$/| $$      
 -- |__/      \_______/|__/         \___/        |__/    \______/  \______/ |__/      
 
-sumAllUSDBSTHelper :: BST Currency -> Double
-sumAllUSDBSTHelper Empty = 0
-sumAllUSDBSTHelper (Node (USD v) l r) = v + (sumAllUSDBSTHelper l) + (sumAllUSDBSTHelper r)
-sumAllUSDBSTHelper (Node (INR v) l r) = (v * 0.012) + (sumAllUSDBSTHelper l) + (sumAllUSDBSTHelper r)
+-- this is the function that takes care of summing all values in a BST of currency, then it returns the sum in USD
+sumAllUSDHelper :: BST Currency -> Double
+sumAllUSDHelper n = case n of
+    Empty -> 0
+    (Node (USD v) l r) -> v + (sumAllUSDHelper l) + (sumAllUSDHelper r)
+    (Node (INR v) l r) -> (v * 0.012) + (sumAllUSDHelper l) + (sumAllUSDHelper r)
+sumAllUSD :: BST Currency -> Currency
+sumAllUSD t = USD $ sumAllUSDHelper t
 
-sumAllUSDBST :: BST Currency -> Currency
-sumAllUSDBST x = USD (sumAllUSDBSTHelper x)
-
-sumAllINRBSTHelper :: BST Currency -> Double
-sumAllINRBSTHelper Empty = 0
-sumAllINRBSTHelper (Node (USD v) l r) = (v * 82) + (sumAllINRBSTHelper l) + (sumAllINRBSTHelper r)
-sumAllINRBSTHelper (Node (INR v) l r) = v + (sumAllINRBSTHelper l) + (sumAllINRBSTHelper r)
-
-sumAllINRBST :: BST Currency -> Currency
-sumAllINRBST x = INR (sumAllINRBSTHelper x)
+-- this is the function that takes care of summing all values in a BST of currency, then it returns the sum in INR
+sumAllINRHelper :: BST Currency -> Double
+sumAllINRHelper n = case n of
+    Empty -> 0
+    (Node (USD v) l r) -> (v * 82) + (sumAllINRHelper l) + (sumAllINRHelper r)
+    (Node (INR v) l r) -> v + (sumAllINRHelper l) + (sumAllINRHelper r)
+sumAllINR :: BST Currency -> Currency
+sumAllINR t = INR $ sumAllINRHelper t
 
 --  /$$$$$$$                       /$$           /$$$$$$$$ /$$                    
 -- | $$__  $$                     | $$          | $$_____/|__/                    
@@ -108,15 +126,17 @@ sumAllINRBST x = INR (sumAllINRBSTHelper x)
 -- | $$     |  $$$$$$$| $$        |  $$$$/      | $$      | $$   \  $/  |  $$$$$$$
 -- |__/      \_______/|__/         \___/        |__/      |__/    \_/    \_______/
 
-convertAllToUSDBST :: BST Currency -> BST Currency
-convertAllToUSDBST Empty = Empty
-convertAllToUSDBST (Node (USD v) l r) = Node (USD v) (convertAllToUSDBST l) (convertAllToUSDBST r)
-convertAllToUSDBST (Node (INR v) l r) = Node (convert (INR v)) (convertAllToUSDBST l) (convertAllToUSDBST r)
+-- a very simple function that converts all values in the BST to USD currency
+convertAllUSD :: BST Currency -> BST Currency
+convertAllUSD n = case n of
+    Empty -> Empty
+    (Node v l r) -> Node (convertToUSD v) (convertAllUSD l) (convertAllUSD r)
 
-convertAllToINRBST :: BST Currency -> BST Currency
-convertAllToINRBST Empty = Empty
-convertAllToINRBST (Node (USD v) l r) = Node (convert (USD v)) (convertAllToINRBST l) (convertAllToINRBST r)
-convertAllToINRBST (Node (INR v) l r) = Node (INR v) (convertAllToINRBST l) (convertAllToINRBST r)
+-- a very simple function that converts all values in the BST to INR currency
+convertAllINR :: BST Currency -> BST Currency
+convertAllINR n = case n of
+    Empty -> Empty
+    (Node v l r) -> Node (convertToINR v) (convertAllINR l) (convertAllINR r)
 
 --  /$$$$$$$                       /$$            /$$$$$$  /$$          
 -- | $$__  $$                     | $$           /$$__  $$|__/          
@@ -127,14 +147,13 @@ convertAllToINRBST (Node (INR v) l r) = Node (INR v) (convertAllToINRBST l) (con
 -- | $$     |  $$$$$$$| $$        |  $$$$/      |  $$$$$$/| $$ /$$/\  $$
 -- |__/      \_______/|__/         \___/         \______/ |__/|__/  \__/
 
+-- this instance of fmap on the BST makes it so that the BST data type is of type class functor, super lame, thought this would be harder
 instance Functor BST where
     fmap _ Empty = Empty
     fmap f (Node v l r) = Node (f v) (fmap f l) (fmap f r)
 
-main :: IO ()
-main = do
-    let t = Empty
-    let t' = insertBST t (USD 100)
-    let t'' = insertBST t' (INR 1000)
-    let t''' = convertAllToUSDBST t''
-    putStrLn (show t''')
+convertAllUSDfmap :: Functor f => f Currency -> f Currency
+convertAllUSDfmap t = convertToUSD `fmap` t
+
+convertAllINRfmap :: Functor f => f Currency -> f Currency
+convertAllINRfmap t = convertToUSD `fmap` t
