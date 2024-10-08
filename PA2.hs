@@ -1,3 +1,6 @@
+-- Samuel Stanley
+-- 11818268
+
 module PA2 where
 
 --  /$$$$$$$                       /$$            /$$$$$$                     
