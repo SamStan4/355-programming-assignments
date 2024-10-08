@@ -134,6 +134,24 @@ sumAllINRHelper n = case n of
 sumAllINR :: BST Currency -> Currency
 sumAllINR t = INR $ sumAllINRHelper t
 
+sumAllUSDHelper' :: BST Currency -> Double
+sumAllUSDHelper' n = case n of
+    Empty -> 0
+    (Node (USD v) l r) -> v + (sumAllUSDHelper' l) + (sumAllUSDHelper' r)
+    (Node (INR _) l r) -> (sumAllUSDHelper' l) + (sumAllUSDHelper' r)
+
+sumAllUSD' :: BST Currency -> Currency
+sumAllUSD' t = USD $ sumAllUSDHelper' t
+
+sumAllINRHelper' :: BST Currency -> Double
+sumAllINRHelper' n = case n of
+    Empty -> 0
+    (Node (USD _) l r) -> (sumAllINRHelper' l) + (sumAllINRHelper' r)
+    (Node (INR v) l r) -> v + (sumAllINRHelper' l) + (sumAllINRHelper' r)
+
+sumAllINR' :: BST Currency -> Currency
+sumAllINR' t = INR $ sumAllINRHelper' t
+
 --  /$$$$$$$                       /$$           /$$$$$$$$ /$$                    
 -- | $$__  $$                     | $$          | $$_____/|__/                    
 -- | $$  \ $$ /$$$$$$   /$$$$$$  /$$$$$$        | $$       /$$ /$$    /$$ /$$$$$$ 
